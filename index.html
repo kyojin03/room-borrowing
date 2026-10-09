@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2f6fed">
+<meta name="description" content="Offline room borrowing and utilization recording system">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<title>Room Borrowing & Utilization</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">Room Utilization</div>
+    <nav>
+      <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+      <button class="nav-btn" data-view="records">Daily Records</button>
+      <button class="nav-btn" data-view="statistics">Statistics</button>
+      <button class="nav-btn" data-view="reports">Reports</button>
+      <button class="nav-btn" data-view="rooms">Rooms</button>
+      <button class="nav-btn" data-view="backup">Backup &amp; Restore</button>
+      <button class="nav-btn" data-view="settings">Settings</button>
+    </nav>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <button id="menuToggle" class="menu-toggle">☰</button>
+      <h1 id="viewTitle">Dashboard</h1>
+    </header>
+
+    <section class="view active" id="view-dashboard">
+      <div class="cards">
+        <div class="card"><div class="card-label">Today's Actual Uses</div><div class="card-value" id="cardToday">–</div></div>
+        <div class="card"><div class="card-label">Active Room Uses</div><div class="card-value" id="cardActive">–</div></div>
+        <div class="card"><div class="card-label">Rooms Occupied</div><div class="card-value" id="cardOccupied">–</div></div>
+        <div class="card"><div class="card-label">Total Active Rooms</div><div class="card-value" id="cardRooms">–</div></div>
+        <div class="card"><div class="card-label">This Month's Actual Uses</div><div class="card-value" id="cardMonth">–</div></div>
+        <div class="card"><div class="card-label">This Month's Usage Hours</div><div class="card-value" id="cardMonthHours">–</div></div>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn" data-goto="records">Record Actual Room Use</button>
+        <button class="btn ghost" data-goto="records">View Daily Records</button>
+        <button class="btn ghost" data-goto="statistics">View Statistics</button>
+      </div>
+
+      <h2>Today's Activity</h2>
+      <table id="todayTable">
+        <thead><tr>
+          <th>Room</th><th>Building</th><th>Borrower</th><th>Department</th><th>Purpose</th>
+          <th>Time In</th><th>Time Out</th><th>Duration</th><th>Status</th><th>Action</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+      <div id="todayEmpty" class="empty-state" hidden>No actual room usage records yet today.</div>
+
+      <h2>Current Room Status</h2>
+      <div class="muted" style="margin-bottom:8px">Rooms with no active borrowing record are available for new recordings.</div>
+      <table id="roomStatusTable">
+        <thead><tr><th>Building</th><th>Room</th><th>Status</th><th>Borrower</th><th>Department</th><th>Time In</th><th>Action</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div id="roomStatusEmpty" class="empty-state" hidden>No rooms currently occupied. All rooms have no active borrowing record.</div>
+    </section>
+
+    <section class="view" id="view-records">
+      <div class="panel">
+        <h2>New Borrowing Record</h2>
+        <form id="recordForm" novalidate>
+          <input type="hidden" id="recId">
+          <fieldset class="form-section">
+            <legend>Actual Room Use <span class="muted">(what actually happened)</span></legend>
+            <div class="grid-form">
+              <label>Actual Use Date <span class="req">*</span> <input type="date" id="recDate" required helper="The day the room was actually used"></label>
+              <label>Actual Building <span class="req">*</span>
+                <select id="recBuilding" required><option value="">Select building</option></select>
+              </label>
+              <label>Actual Room <span class="req">*</span>
+                <select id="recRoom" required><option value="">Select building first</option></select>
+              </label>
+              <label>Actual Borrower/User <span class="req">*</span> <input id="recBorrower" required list="borrowerList" placeholder="Name">
+                <datalist id="borrowerList"></datalist>
+              </label>
+              <label>Actual Department <span class="req">*</span> <input id="recDepartment" required list="deptList" placeholder="Department">
+                <datalist id="deptList"></datalist>
+              </label>
+              <label>Actual Purpose <span class="req">*</span> <input id="recPurpose" required list="purposeList" placeholder="e.g. Meeting">
+                <datalist id="purposeList"></datalist>
+              </label>
+              <label>Actual Time In <span class="req">*</span>
+                <span class="time-input"><input type="time" id="recTimeIn" required><button type="button" class="btn small ghost" data-now="recTimeIn">Now</button></span>
+              </label>
+              <label>Actual Time Out
+                <span class="time-input"><input type="time" id="recTimeOut"><button type="button" class="btn small ghost" data-now="recTimeOut">Now</button></span>
+              </label>
+              <label id="transferReasonRow" hidden>Transfer Reason <input id="recTransferReason" placeholder="Why a different room was used"></label>
+              <label class="span2">Remarks <input id="recRemarks" placeholder="Optional"></label>
+            </div>
+            <div id="durationPreview" class="muted" aria-live="polite"></div>
+          </fieldset>
+          <details class="form-section" id="reqRefDetails">
+            <summary>Request Reference <span class="muted">(optional — from the signed paper form, for comparison)</span></summary>
+            <div class="grid-form" style="margin-top:12px">
+              <label>Request Reference <input id="recRequestReference" placeholder="e.g. RB-2026-014"></label>
+              <label>Request Date <input type="date" id="recRequestDate"></label>
+              <label>Requesting Department <input id="recRequestingDepartment"></label>
+              <label>Department Head <input id="recDepartmentHead"></label>
+              <label>Requested By <input id="recRequestedBy"></label>
+              <label>Noted By <input id="recNotedBy"></label>
+              <label>Requested Building <input id="recRequestedBuilding"></label>
+              <label>Requested Room <input id="recRequestedRoom"></label>
+              <label>Requested Date <input type="date" id="recRequestedDate"></label>
+              <label>Requested Time In <input type="time" id="recRequestedTimeIn"></label>
+              <label>Requested Time Out <input type="time" id="recRequestedTimeOut"></label>
+            </div>
+          </details>
+          <div id="formErrors" class="form-errors" role="alert"></div>
+          <div class="form-actions">
+            <button type="submit" class="btn" id="recSubmit">Save Record</button>
+            <button type="button" class="btn ghost" id="recSaveAnother">Save &amp; Add Another</button>
+            <button type="button" class="btn ghost" id="recReset">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <h2>Records</h2>
+      <div class="toolbar">
+        <input id="fSearch" placeholder="Search borrower, room, purpose..." aria-label="Search records">
+        <select id="fBuilding" aria-label="Filter by building"><option value="">All Buildings</option></select>
+        <input type="date" id="fFrom" title="From date" aria-label="From date">
+        <input type="date" id="fTo" title="To date" aria-label="To date">
+        <button class="btn ghost" id="fAdvancedToggle" aria-expanded="false">Advanced filters ▾</button>
+        <button class="btn ghost" id="fClear">Clear Filters</button>
+        <button class="btn ghost" id="fExportCsv">Export CSV</button>
+        <button class="btn ghost" id="fExportPdf">Export PDF</button>
+      </div>
+      <div id="advancedFilters" class="toolbar" hidden>
+        <input type="date" id="fDate" title="Exact date" aria-label="Exact date">
+        <input id="fRoom" placeholder="Room">
+        <input id="fDept" placeholder="Department">
+        <input id="fBorrower" placeholder="Borrower">
+        <input id="fPurpose" placeholder="Purpose">
+        <select id="fStatus"><option value="">All Status</option><option>Active</option><option>Completed</option></select>
+        <select id="fTransfer"><option value="">All Transfer</option><option>Yes</option><option>No</option></select>
+      </div>
+      <div id="filterChips" class="chips"></div>
+      <div class="table-wrap">
+      <table id="recordsTable">
+        <thead><tr>
+          <th data-sort="actualDate">Date</th><th data-sort="actualRoomName">Room</th><th data-sort="actualBuilding">Building</th>
+          <th data-sort="actualBorrower">Borrower</th><th data-sort="actualDepartment">Department</th><th data-sort="actualPurpose">Purpose</th>
+          <th data-sort="actualTimeIn">Time In</th><th data-sort="actualTimeOut">Time Out</th><th data-sort="actualDurationMinutes">Duration</th>
+          <th data-sort="wasTransferred">Transfer</th><th data-sort="status">Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+      </div>
+      <div id="recordsEmpty" class="empty-state" hidden>No records match the current filters.</div>
+      <div class="pager">
+        <button class="btn small ghost" id="pgPrev">Prev</button>
+        <span id="pgInfo" class="muted"></span>
+        <button class="btn small ghost" id="pgNext">Next</button>
+        <label class="inline">Rows per page
+          <select id="pgSize"><option>10</option><option>20</option><option>50</option><option value="9999">All</option></select>
+        </label>
+      </div>
+    </section>
+    <section class="view" id="view-statistics">
+      <div class="toolbar">
+        <label class="inline">From <input type="date" id="sFrom"></label>
+        <label class="inline">To <input type="date" id="sTo"></label>
+        <button class="btn ghost" id="sApply">Apply Range</button>
+        <button class="btn ghost" id="sAll">All Time</button>
+      </div>
+      <div id="statsBody"></div>
+
+      <h2>Period Comparison</h2>
+      <div class="toolbar">
+        <select id="cmpMode">
+          <option value="month">This month vs previous month</option>
+          <option value="week">This week vs previous week</option>
+          <option value="year">This year vs previous year</option>
+        </select>
+        <button class="btn" id="cmpRun">Compare</button>
+      </div>
+      <div id="cmpResult"></div>
+
+      <h2>Monthly Trend</h2>
+      <div class="toolbar">
+        <select id="trendYear"></select>
+        <button class="btn" id="trendRun">Show</button>
+      </div>
+      <div id="trendResult"></div>
+    </section>
+    <section class="view" id="view-reports">
+      <div class="toolbar no-print">
+        <label class="inline">From <input type="date" id="rFrom"></label>
+        <label class="inline">To <input type="date" id="rTo"></label>
+        <select id="rBuilding"><option value="">All Buildings</option></select>
+        <input id="rRoom" placeholder="Room">
+        <input id="rDept" placeholder="Department">
+        <input id="rBorrower" placeholder="Borrower">
+        <input id="rPurpose" placeholder="Purpose">
+        <select id="rTransfer"><option value="">All Transfer</option><option>Yes</option><option>No</option></select>
+        <button class="btn" id="rGenerate">Generate Report</button>
+        <button class="btn ghost" id="rPrint">Print / PDF</button>
+        <button class="btn ghost" id="rCsv">Export CSV</button>
+      </div>
+      <div id="reportArea" class="panel" hidden>
+        <h2 style="margin-top:0">ROOM BORROWING AND ACTUAL UTILIZATION REPORT</h2>
+        <div id="reportBody"></div>
+      </div>
+      <div id="reportEmpty" class="empty-state">Set filters and click Generate Report.</div>
+    </section>
+    <section class="view" id="view-backup">
+      <div class="panel">
+        <p class="muted">This application stores data locally on this device/browser. Regular backups are recommended to prevent data loss.</p>
+        <table><tbody>
+          <tr><td><b>Last Backup</b></td><td id="bkLast">—</td></tr>
+          <tr><td><b>Total Records</b></td><td id="bkRecords">—</td></tr>
+          <tr><td><b>Total Rooms</b></td><td id="bkRooms">—</td></tr>
+          <tr><td><b>Storage Estimate</b></td><td id="bkSize">—</td></tr>
+        </tbody></table>
+        <div class="toolbar" style="margin-top:14px">
+          <button class="btn" id="bkExport">Export Full Backup</button>
+          <button class="btn ghost" id="bkImport">Restore Backup</button>
+          <input type="file" id="bkFile" accept=".json,application/json" hidden>
+          <button class="btn ghost" id="bkCsv">Export Records CSV</button>
+        </div>
+      </div>
+    </section>
+    <section class="view" id="view-settings">
+      <div class="panel">
+        <h2>Demo Data</h2>
+        <p class="muted">Demo data is for development/testing only. It is never loaded automatically and can be removed completely.</p>
+        <div class="toolbar">
+          <button class="btn ghost" id="demoLoad">Load Demo Data</button>
+          <button class="btn ghost" id="demoRemove">Remove Demo Data</button>
+        </div>
+        <h2>Danger Zone</h2>
+        <button class="btn ghost" id="wipeAll" style="color:var(--danger);border-color:var(--danger)">Erase All Local Data</button>
+      </div>
+    </section>
+
+    <section class="view" id="view-rooms">
+      <div class="toolbar">
+        <input id="roomSearch" type="text" placeholder="Search rooms...">
+        <select id="roomBuildingFilter"><option value="">All Buildings</option></select>
+        <select id="roomStatusFilter">
+          <option value="">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <button class="btn" id="addRoomBtn">+ Add Room</button>
+      </div>
+      <table id="roomsTable">
+        <thead><tr>
+          <th>Building</th><th>Room / Facility</th><th>Type</th><th>Status</th><th>Notes</th><th>Actions</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+      <div id="roomsEmpty" class="empty-state" hidden>No rooms found.</div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="roomModal" hidden>
+  <div class="modal-box">
+    <h3 id="roomModalTitle">Add Room</h3>
+    <form id="roomForm">
+      <label>Building
+        <select id="rfBuilding" required></select>
+      </label>
+      <label>Room / Facility Name <input id="rfName" required></label>
+      <label>Room Type <input id="rfType" placeholder="e.g. Classroom, Laboratory, Office"></label>
+      <label>Status
+        <select id="rfStatus"><option>Active</option><option>Inactive</option></select>
+      </label>
+      <label>Notes <textarea id="rfNotes" rows="2"></textarea></label>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="roomModalCancel">Cancel</button>
+        <button type="submit" class="btn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="detailModal" hidden>
+  <div class="modal-box">
+    <h3>Record Details</h3>
+    <div id="detailBody" class="detail-body"></div>
+    <div class="modal-actions"><button class="btn ghost" id="detailClose">Close</button></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="js/utils.js"></script>
+<script src="js/db.js"></script>
+<script src="js/rooms.js"></script>
+<script src="js/records.js"></script>
+<script src="js/statistics.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/backup.js"></script>
+<script src="js/app.js"></script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');</script>
+</body>
+</html>
