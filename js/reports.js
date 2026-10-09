@@ -28,9 +28,10 @@ const Reports = {
 
   bars(rows) {
     const max = Math.max(...rows.map(r => r[1]), 1);
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '' }[c]));
     return rows.slice(0, 12).map(([label, value]) => `
       <div class="trend-row">
-        <span class="trend-label" style="width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${String(label).replace(/"/g, '')}">${label}</span>
+        <span class="trend-label" style="width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(label)}">${esc(label)}</span>
         <div class="trend-bar" style="width:${value ? Math.max(3, value / max * 100) : 0}%"></div>
         <span class="trend-num" style="width:auto">${value}</span>
       </div>`).join('');
