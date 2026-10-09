@@ -26,6 +26,16 @@ const Reports = {
 
   group(recs, fn) { const m = new Map(); for (const r of recs) { const k = fn(r); (m.get(k) || m.set(k, []).get(k)).push(r); } return m; },
 
+  bars(rows) {
+    const max = Math.max(...rows.map(r => r[1]), 1);
+    return rows.slice(0, 12).map(([label, value]) => `
+      <div class="trend-row">
+        <span class="trend-label" style="width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${String(label).replace(/"/g, '')}">${label}</span>
+        <div class="trend-bar" style="width:${value ? Math.max(3, value / max * 100) : 0}%"></div>
+        <span class="trend-num" style="width:auto">${value}</span>
+      </div>`).join('');
+  },
+
   render() {
     const recs = Reports.recs;
     const area = document.getElementById('reportArea');
@@ -95,11 +105,11 @@ const Reports = {
       <h3>Detailed Records</h3>
       <table><thead><tr><th>Request Date</th><th>Req. Dept</th><th>Requested Room</th><th>Requested Date</th><th>Req. Time In</th><th>Actual Date</th><th>Building</th><th>Room</th><th>Borrower</th><th>Department</th><th>Purpose</th><th>Time In</th><th>Time Out</th><th>Duration</th><th>Transfer</th><th>Remarks</th></tr></thead><tbody>${detailed}</tbody></table>
       <h3>Utilization Analysis</h3>
-      <h4>Room Usage</h4>${Stats.table(['Room', 'Uses', 'Total Duration', 'Avg Duration'], roomRows)}
-      <h4>Building Usage</h4>${Stats.table(['Building', 'Uses', '% of Total', 'Total Duration'], bldgRows)}
+      <h4>Room Usage</h4>${Reports.bars(roomRows.map(r => [r[0], r[1]]))}${Stats.table(['Room', 'Uses', 'Total Duration', 'Avg Duration'], roomRows)}
+      <h4>Building Usage</h4>${Reports.bars(bldgRows.map(r => [r[0], r[1]]))}${Stats.table(['Building', 'Uses', '% of Total', 'Total Duration'], bldgRows)}
       <h4>Department Usage</h4>${Stats.table(['Department', 'Uses', 'Total Duration'], deptRows)}
-      <h4>Purpose Distribution</h4>${Stats.table(['Purpose', 'Uses', '% of Total', 'Total Duration'], purposeRows)}
-      <h4>Time Pattern</h4>${Stats.table(['Period', 'Records'], Object.entries(periods).map(([k, v]) => [k, v]))}
+      <h4>Purpose Distribution</h4>${Reports.bars(purposeRows.map(r => [r[0], r[1]]))}${Stats.table(['Purpose', 'Uses', '% of Total', 'Total Duration'], purposeRows)}
+      <h4>Time Pattern</h4>${Reports.bars(Object.entries(periods))}${Stats.table(['Period', 'Records'], Object.entries(periods).map(([k, v]) => [k, v]))}
       <h4>Transfers</h4><p>${transfers} of ${recs.length} actual uses differed from the originally requested room.</p>
       <h3>Analysis</h3><p>${interpretation}</p>`;
   },
