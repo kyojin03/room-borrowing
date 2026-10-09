@@ -26,15 +26,19 @@ const Reports = {
 
   group(recs, fn) { const m = new Map(); for (const r of recs) { const k = fn(r); (m.get(k) || m.set(k, []).get(k)).push(r); } return m; },
 
-  bars(rows) {
+  bars(rows, total) {
     const max = Math.max(...rows.map(r => r[1]), 1);
+    const denom = total || rows.reduce((s, r) => s + r[1], 0) || 1;
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '' }[c]));
-    return rows.slice(0, 12).map(([label, value]) => `
+    return rows.slice(0, 12).map(([label, value]) => {
+      const share = Math.round(value / denom * 100);
+      return `
       <div class="trend-row">
         <span class="trend-label" title="${esc(label)}">${esc(label)}</span>
         <div class="trend-track"><div class="trend-bar" style="width:${value ? Math.max(4, value / max * 100) : 0}%"></div></div>
-        <span class="trend-num">${value} · ${max ? Math.round(value / max * 100) : 0}%</span>
-      </div>`).join('');
+        <span class="trend-num">${value} · ${share}%</span>
+      </div>`;
+    }).join('');
   },
 
   render() {
