@@ -86,10 +86,11 @@ details.form-section summary { cursor: pointer; font-size: 12.5px; font-weight: 
 .detail-body { font-size: 14px; line-height: 1.95; }
 .detail-body b { display: inline-block; width: 150px; color: var(--muted); font-weight: 600; }
 label.inline { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-.trend-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
-.trend-label { width: 44px; font-size: 12.5px; color: var(--muted); }
-.trend-bar { background: linear-gradient(90deg, var(--accent), #6ea8ff); height: 16px; border-radius: 6px; min-width: 0; }
-.trend-num { font-size: 12.5px; width: 32px; color: var(--muted); }
+.trend-row { display: grid; grid-template-columns: 170px 1fr 64px; align-items: center; gap: 12px; margin-bottom: 9px; max-width: 720px; }
+.trend-label { font-size: 12.5px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trend-track { background: #eef1f6; height: 18px; border-radius: 9px; overflow: hidden; }
+.trend-bar { background: linear-gradient(90deg, var(--accent), #6ea8ff); height: 100%; border-radius: 9px; min-width: 0; }
+.trend-num { font-size: 12.5px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
 .modal { position: fixed; inset: 0; background: rgba(15,27,45,.45); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 50; animation: fade .15s ease; }
 .modal[hidden] { display: none; }
 .modal-box { background: var(--panel); border-radius: 16px; padding: 24px; width: min(460px, 92vw); box-shadow: 0 24px 60px -12px rgba(15,27,45,.35); max-height: 86vh; overflow-y: auto; }

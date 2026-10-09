@@ -219,7 +219,7 @@ const Stats = {
     out.innerHTML = rows.map(r => `
       <div class="trend-row">
         <span class="trend-label">${r.label}</span>
-        <div class="trend-bar" style="width:${r.count ? Math.max(4, r.count / maxCount * 100) : 0}%"></div>
+        <div class="trend-track"><div class="trend-bar" style="width:${r.count ? Math.max(4, r.count / maxCount * 100) : 0}%"></div></div>
         <span class="trend-num">${r.count}</span>
       </div>`).join('') +
       Stats.table(['Month', 'Actual Uses', 'Total Duration', 'Avg Duration', 'Rooms Used'],
