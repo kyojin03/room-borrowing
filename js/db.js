@@ -3,7 +3,7 @@ const DB_NAME = 'RoomBorrowingDB';
 const DB_VERSION = 2;
 
 const ROOM_GROUPS = {
-  'CATALINA 1': ['Room 101','Room 104','Room 105','Room 201','Room 202','Room 203','Room 204','Room 205','Room 302','Room 303','Room 304','Room 305','Room 401','Room 402','Room 403','Room 404'],
+  'CATALINA 1': ['Room 101','Room 104','Room 105','Room 201','Room 202','Room 203','Room 204','Room 205','Room 302','Room 303','Room 304','Room 305','Room 401','Room 402','Room 403','Room 404','Room 501','Room 502','Room 503','Room 504','Room 505'],
   'CATALINA 2': ['Room 301','Room 302','Room 303','Room 304','Room 305','Room 306','Room 307','Room 401','Room 402','Room 403','Room 404','Room 405','Room 406','Room 407','Room 408','Room 409','Room 501','Room 502','Room 503','Room 504','Room 505','Room 506','Room 507','Room 508','Room 601','Room 602','Room 603','Room 604','Room 605','Room 606','Room 607','Room 608','Room 609','NSTP/MPH','ED TECH','Reading Room 1','Reading Room 2','Alumni/Research'],
   'CATALINA 3': ['Room 201','Room 202','Room 203','Room 204','Room 205','Room 206'],
   'PEREGRIN 3': ['Room 101','Room 102','Room 103','Room 104','Room 105','Room 106','Room 107','Room 108','Room 201','Room 202','Room 203','Room 204','Room 205','Room 206','Room 301','Room 302','Room 303','Room 304','Room 305','Room 306','Room 307','Room 308','Room 401','Room 402','Room 403','Room 404','Room 405','Room 406','Room 407','Room 408'],
